@@ -23,10 +23,22 @@ function DeckViewerSkeleton() {
 
 interface DeckViewerProps {
   slides: string[];
+  fullHtml?: string;
   readOnly?: boolean;
   onSlideChange?: (index: number) => void;
 }
 
 export function DeckViewer(props: DeckViewerProps) {
-  return <DeckViewerClient {...props} />;
+  if (props.fullHtml) {
+    return (
+      <iframe
+        srcDoc={props.fullHtml}
+        className="w-full h-full border-0"
+        title="Pitch Deck"
+        sandbox="allow-scripts allow-same-origin"
+      />
+    );
+  }
+
+  return <DeckViewerClient slides={props.slides} readOnly={props.readOnly} onSlideChange={props.onSlideChange} />;
 }

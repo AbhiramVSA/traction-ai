@@ -13,6 +13,7 @@ export interface Project {
   prompt: string;
   status: "generating" | "draft" | "finalized" | "shared";
   slidesHtml: string[];
+  fullHtml?: string;
   thumbnailUrl: string | null;
   createdAt: string;
   updatedAt: string;

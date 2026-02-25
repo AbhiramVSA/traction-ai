@@ -617,6 +617,820 @@ const urbanLoopSlides: string[] = [
   `),
 ];
 
+
+// ---- Project 5: Traction Demo (shared, fullHtml) ----------------------------
+
+const tractionDemoHtml = `<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Traction - Pitch Deck</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- HLS for video streaming -->
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+
+    <style>
+        /* Theme Setup */
+        body {
+            margin: 0;
+            background-color: #000;
+            color: #fff;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            overflow: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Typography Clamps */
+        .clamp-title-lg {
+            font-size: clamp(32px, 5vw, 96px);
+            tracking: -0.02em;
+            line-height: 1.05;
+            font-weight: 700;
+            text-wrap: balance;
+        }
+
+        .clamp-title-md {
+            font-size: clamp(28px, 4vw, 64px);
+            tracking: -0.02em;
+            line-height: 1.05;
+            font-weight: 700;
+            text-wrap: balance;
+        }
+
+        .clamp-subtitle {
+            font-size: clamp(20px, 2.5vw, 48px);
+            font-weight: 500;
+        }
+
+        .clamp-card-title {
+            font-size: clamp(18px, 2vw, 36px);
+            font-weight: 700;
+        }
+
+        .clamp-body {
+            font-size: clamp(12px, 1.2vw, 20px);
+            font-weight: 400;
+            line-height: 1.6;
+        }
+
+        .clamp-small {
+            font-size: clamp(12px, 1.05vw, 16px);
+            font-weight: 400;
+        }
+
+        /* The Presentation Canvas */
+        #presentation {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+        }
+
+        /* Slides & Transitions */
+        .slide {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: all 500ms ease-in-out;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .slide.past {
+            transform: scale(0.95);
+        }
+
+        .slide.future {
+            transform: scale(1.05);
+        }
+
+        .slide.active {
+            opacity: 1;
+            transform: scale(1);
+            z-index: 10;
+            pointer-events: auto;
+        }
+
+        /* Video Background */
+        .bg-video {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 0;
+        }
+
+        /* Slide Content Container */
+        .content-layer {
+            position: absolute;
+            inset: 0;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            padding: 4%;
+        }
+
+        /* Header & Footer Layout */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            opacity: 0.8;
+            width: 100%;
+        }
+
+        .header-text {
+            font-size: clamp(12px, 1.05vw, 20px);
+            font-weight: 500;
+        }
+
+        footer {
+            position: absolute;
+            bottom: 4%;
+            width: 92%;
+            display: flex;
+            justify-content: flex-end;
+            opacity: 0.6;
+            font-size: clamp(12px, 1.05vw, 20px);
+        }
+
+        /* Glassmorphism aesthetics */
+        .liquid-glass {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%);
+            backdrop-filter: blur(24px) saturate(1.4);
+            -webkit-backdrop-filter: blur(24px) saturate(1.4);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Subtle radial specular highlight at top-left */
+        .liquid-glass::before {
+            content: '';
+            position: absolute;
+            top: -20px;
+            left: -20px;
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 60%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        /* Controls overlay */
+        #controls {
+            position: fixed;
+            bottom: 2%;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 50;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 12px 24px;
+            border-radius: 99px;
+            transition: opacity 300ms ease;
+        }
+
+        #controls.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .nav-btn {
+            color: rgba(255, 255, 255, 0.5);
+            cursor: pointer;
+            transition: all 200ms ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+        }
+
+        .nav-btn:hover {
+            color: rgba(255, 255, 255, 0.9);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 99px;
+            background: rgba(255, 255, 255, 0.3);
+            transition: all 300ms ease;
+            cursor: pointer;
+        }
+
+        .dot.active {
+            width: 24px;
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        #kb-hint {
+            position: fixed;
+            top: 2%;
+            right: 2%;
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.4);
+            z-index: 50;
+            transition: opacity 300ms;
+        }
+
+        #kb-hint.hidden {
+            opacity: 0;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Controls overlay -->
+    <div id="controls" class="liquid-glass">
+        <div id="slide-counter" class="text-[13px] text-white/50 tracking-widest font-mono mr-4">1 / 12</div>
+        <div id="dots-container" class="flex gap-2 items-center"></div>
+        <div class="w-[1px] h-4 bg-white/20 mx-2"></div>
+        <button class="nav-btn" onclick="goToSlide(current - 1)"><i data-lucide="chevron-left"
+                class="w-5 h-5"></i></button>
+        <button class="nav-btn" onclick="goToSlide(current + 1)"><i data-lucide="chevron-right"
+                class="w-5 h-5"></i></button>
+        <div class="w-[1px] h-4 bg-white/20 mx-2"></div>
+        <button class="nav-btn" onclick="toggleFullscreen()"><i data-lucide="maximize" class="w-4 h-4"></i></button>
+    </div>
+
+    <div id="kb-hint">← → Navigate · F Fullscreen</div>
+
+    <!-- Container for all slides -->
+    <div id="presentation">
+
+        <!-- SLIDE 1: Cover -->
+        <div class="slide cover active"
+            data-bg="https://stream.mux.com/JNJEOYI6B3EffB9f5ZhpGbuxzc6gSyJcXaCBbCgZKRg.m3u8">
+            <video autoplay loop muted playsinline class="bg-video"></video>
+            <div class="content-layer">
+                <header>
+                    <div class="flex items-center gap-2"><i data-lucide="code-xml" class="w-8 h-8 opacity-90"></i><span
+                            class="header-text font-bold">Traction</span></div>
+                    <div class="header-text">Pitch Deck</div>
+                </header>
+                <div class="flex flex-col justify-center flex-1 mt-[-3%]">
+                    <h1 class="clamp-title-lg">Traction</h1>
+                    <h2
+                        class="clamp-subtitle opacity-90 mt-[1.5%] text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400">
+                        Your startup's pre-launch presence.</h2>
+                    <p class="clamp-body opacity-75 mt-[2%]">By The Traction Team</p>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- SLIDE 2: The Problem 1 -->
+        <div class="slide intro" data-bg="https://stream.mux.com/Kec29dVyJgiPdtWaQtPuEiiGHkJIYQAVUJcNiIHUYeo.m3u8">
+            <video autoplay loop muted playsinline class="bg-video"></video>
+            <div class="content-layer">
+                <header>
+                    <div class="flex items-center gap-2"><i data-lucide="code-xml" class="w-6 h-6 opacity-90"></i><span
+                            class="header-text font-bold">Traction</span></div>
+                    <div class="header-text">Page 001</div>
+                </header>
+                <div class="flex flex-col justify-center flex-1">
+                    <h2 class="clamp-title-md">The 7-Document Pitch</h2>
+
+                    <div class="flex flex-row justify-between items-start mt-[4%] gap-[4%] w-full">
+                        <div class="flex-none basis-[25%]">
+                            <p class="clamp-body opacity-90 mb-4">High-velocity founders send scattered PDFs, Google
+                                Docs, and Notion
+                                pages to investors...</p>
+                            <div class="flex items-end gap-3">
+                                <span class="clamp-title-md">6+</span>
+                                <span class="clamp-body text-white/80 pb-2">Ideas / Year</span>
+                            </div>
+                        </div>
+
+                        <div class="flex-none basis-[40%] liquid-glass p-[3%]">
+                            <p class="clamp-body opacity-90">"I spent 5 hours assembling my pitch materials, and
+                                investors skimmed it
+                                in 30 seconds."</p>
+                            <p class="clamp-small text-white/50 mt-4">— Every founder ever</p>
+                        </div>
+
+                        <div class="flex-none basis-[25%] flex flex-col items-start">
+                            <span class="clamp-title-md text-red-400">0%</span>
+                            <p class="clamp-body opacity-90 mt-2">Discoverability before building.</p>
+                            <div class="w-full h-[60px] relative mt-4">
+                                <svg viewBox="0 0 100 40" class="w-full h-full" preserveAspectRatio="none">
+                                    <path d="M0,35 Q25,30 50,30 T100,20" fill="none" stroke="rgba(255,255,255,0.4)"
+                                        stroke-width="2" />
+                                    <circle cx="100" cy="20" r="3" fill="#ef4444" />
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <footer>The Current Pitch Flow is Broken</footer>
+            </div>
+        </div>
+
+        <!-- SLIDE 3: The Problem 2 -->
+        <div class="slide" data-bg="https://stream.mux.com/Kec29dVyJgiPdtWaQtPuEiiGHkJIYQAVUJcNiIHUYeo.m3u8">
+            <video autoplay loop muted playsinline class="bg-video"></video>
+            <div class="content-layer">
+                <header>
+                    <div class="flex items-center gap-2"><i data-lucide="code-xml" class="w-6 h-6 opacity-90"></i><span
+                            class="header-text font-bold">Traction</span></div>
+                    <div class="header-text">Page 002</div>
+                </header>
+                <div class="flex flex-col justify-center items-center flex-1 text-center max-w-[80%] mx-auto">
+                    <p class="clamp-body opacity-80 uppercase tracking-widest mb-4">The "Nice UI" Trap</p>
+                    <h2 class="clamp-title-md mb-[5%]">Most AI pitch generators just put icing on a bad cake.</h2>
+                    <div class="grid grid-cols-2 gap-[5%] w-full text-left">
+                        <div class="liquid-glass p-[5%]">
+                            <i data-lucide="x-circle" class="w-8 h-8 text-red-400 mb-4"></i>
+                            <h3 class="clamp-card-title mb-2">Templated</h3>
+                            <p class="clamp-body text-white/70">Glorified Google Slides. Everyone's pitch ends up
+                                looking the exact
+                                same.</p>
+                        </div>
+                        <div class="liquid-glass p-[5%]">
+                            <i data-lucide="x-circle" class="w-8 h-8 text-red-400 mb-4"></i>
+                            <h3 class="clamp-card-title mb-2">No Honesty</h3>
+                            <p class="clamp-body text-white/70">Tools say "Great idea!" instead of spotting critical
+                                go-to-market
+                                gaps.</p>
+                        </div>
+                    </div>
+                </div>
+                <footer>We need intelligence, not just templates</footer>
+            </div>
+        </div>
+
+        <!-- SLIDE 4: Solution -->
+        <div class="slide" data-bg="https://stream.mux.com/fHfa8VIbBdqZelLGg5thjsypZ101M01dbyIMLNDWQwlLA.m3u8">
+            <video autoplay loop muted playsinline class="bg-video"></video>
+            <div class="content-layer">
+                <header>
+                    <div class="flex items-center gap-2"><i data-lucide="code-xml" class="w-6 h-6 opacity-90"></i></div>
+                    <div class="header-text">Page 003</div>
+                </header>
+                <div class="flex flex-col flex-1 mt-[5%]">
+                    <div class="text-center mb-[4%]">
+                        <p class="clamp-body opacity-90 uppercase tracking-[0.2em] mb-2">Introducing</p>
+                        <h2 class="clamp-title-md">Ideate, Generate, Pitch.</h2>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-[3%] w-full h-[40vh]">
+                        <div class="liquid-glass p-[8%] flex flex-col justify-end">
+                            <i data-lucide="message-square-dashed" class="w-10 h-10 mb-6"></i>
+                            <h3 class="clamp-card-title mb-2">1. Ideate</h3>
+                            <p class="clamp-body text-white/80">Dump a messy idea, get it structured, and survive brutal
+                                AI readiness
+                                feedback.</p>
+                        </div>
+                        <div class="liquid-glass p-[8%] flex flex-col justify-end">
+                            <i data-lucide="wand-2" class="w-10 h-10 mb-6"></i>
+                            <h3 class="clamp-card-title mb-2">2. Generate</h3>
+                            <p class="clamp-body text-white/80">AI writes a completely unique, code-driven web
+                                presentation. No
+                                templates.</p>
+                        </div>
+                        <div class="liquid-glass p-[8%] flex flex-col justify-end">
+                            <i data-lucide="share-2" class="w-10 h-10 mb-6"></i>
+                            <h3 class="clamp-card-title mb-2">3. Publish</h3>
+                            <p class="clamp-body text-white/80">One link. Investors get the deck, the risks, and the
+                                summary in a
+                                single scroll.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 5: Brutal Ideation -->
+        <div class="slide quote" data-bg="https://stream.mux.com/4IMYGcL01xjs7ek5ANO17JC4VQVUTsojZlnw4fXzwSxc.m3u8">
+            <video autoplay loop muted playsinline class="bg-video"></video>
+            <div class="content-layer items-center justify-center">
+                <div class="max-w-[75%] text-center">
+                    <p class="clamp-body text-red-300 font-mono mb-6 tracking-wider uppercase">— Readiness Agent Flags —
+                    </p>
+                    <h2 class="clamp-title-md tracking-[-0.02em] leading-tight mb-8">
+                        "You have 200 waitlist signups, but no distribution strategy. Your market size is vanity. Why
+                        will they pay
+                        $49?"
+                    </h2>
+                    <p class="clamp-subtitle opacity-70">A pitch tool should force clarity, not hide weaknesses.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 6: Code-Driven Generation -->
+        <div class="slide" data-bg="https://stream.mux.com/fHfa8VIbBdqZelLGg5thjsypZ101M01dbyIMLNDWQwlLA.m3u8">
+            <video autoplay loop muted playsinline class="bg-video"></video>
+            <div class="content-layer">
+                <header>
+                    <div class="flex items-center gap-2"><i data-lucide="code-xml" class="w-6 h-6 opacity-90"></i></div>
+                    <div class="header-text">Page 005</div>
+                </header>
+                <div class="flex flex-col justify-center flex-1 max-w-[90%]">
+                    <h2 class="clamp-title-md mb-[2%]">Bespoke Decks via AI HTML</h2>
+                    <p class="clamp-subtitle text-white/80 mb-[6%] max-w-[70%]">
+                        We don't fill in template blanks. Our AI generates a self-contained, highly-stylized HTML/CSS
+                        payload for
+                        every deck.
+                    </p>
+                    <div class="grid grid-cols-2 gap-[5%]">
+                        <div class="liquid-glass p-[6%] border-l-4 border-l-blue-400">
+                            <i data-lucide="file-code-2" class="w-8 h-8 text-blue-400 mb-4"></i>
+                            <h3 class="clamp-card-title mb-2">100% Unique</h3>
+                            <p class="clamp-body text-white/70">Layouts, animations, and typography are formulated on
+                                the fly.</p>
+                        </div>
+                        <div class="liquid-glass p-[6%] border-l-4 border-l-purple-400">
+                            <i data-lucide="lock" class="w-8 h-8 text-purple-400 mb-4"></i>
+                            <h3 class="clamp-card-title mb-2">Sandboxed iFrames</h3>
+                            <p class="clamp-body text-white/70">The custom deck is securely rendered within our
+                                consistent platform
+                                UI.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 7: The One Link -->
+        <div class="slide" data-bg="https://stream.mux.com/Kec29dVyJgiPdtWaQtPuEiiGHkJIYQAVUJcNiIHUYeo.m3u8">
+            <video autoplay loop muted playsinline class="bg-video"></video>
+            <div class="content-layer">
+                <header>
+                    <div class="flex items-center gap-2"><i data-lucide="code-xml" class="w-6 h-6 opacity-90"></i></div>
+                    <div class="header-text">Page 006</div>
+                </header>
+                <div class="flex h-full items-center mt-[2%] gap-[8%]">
+                    <div class="basis-[50%]">
+                        <h2 class="clamp-title-md mb-6">The One-Link Pitch</h2>
+                        <p class="clamp-body text-white/80 mb-6">Investors shouldn't have to piece your story together.
+                        </p>
+                        <ul class="space-y-4 clamp-body font-medium">
+                            <li class="flex items-center gap-4">
+                                <div class="w-3 h-3 rounded-full bg-green-400"></div> The Immersive Presentation (above
+                                the fold)
+                            </li>
+                            <li class="flex items-center gap-4">
+                                <div class="w-3 h-3 rounded-full bg-blue-400"></div> Honest "Should I invest?" Summary
+                            </li>
+                            <li class="flex items-center gap-4">
+                                <div class="w-3 h-3 rounded-full bg-yellow-400"></div> Identified Risks & Strengths
+                            </li>
+                            <li class="flex items-center gap-4">
+                                <div class="w-3 h-3 rounded-full bg-purple-400"></div> Deep Dive Database (below the
+                                fold)
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="basis-[50%] relative h-[70vh] liquid-glass flex flex-col overflow-hidden">
+                        <!-- mock UI -->
+                        <div class="h-1/2 bg-black/40 flex items-center justify-center border-b border-white/10">
+                            <span class="opacity-50 tracking-widest">[ DECK IFRAME ]</span>
+                        </div>
+                        <div class="p-6">
+                            <h4 class="text-sm uppercase tracking-widest text-[#D2FF55] mb-2">Investor Summary</h4>
+                            <p class="text-xs text-white/80 leading-relaxed mb-4">Verdict: Interesting. Clear ICP
+                                identified. Main
+                                risk is crowded analytics space.<br />Key Question to ask: Why will they pay?</p>
+                            <div class="h-2 w-3/4 bg-white/10 rounded-full mb-2"></div>
+                            <div class="h-2 w-1/2 bg-white/10 rounded-full"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 8: Discoverability -->
+        <div class="slide" data-bg="https://stream.mux.com/00qQnfNo7sSpn3pB1hYKkyeSDvxs01NxiQ3sr29uL3e028.m3u8">
+            <video autoplay loop muted playsinline class="bg-video"></video>
+            <div class="content-layer justify-center items-center text-center">
+                <i data-lucide="bot" class="w-16 h-16 text-[#D2FF55] mb-8"></i>
+                <h2 class="clamp-title-md mb-4 flex items-center justify-center gap-4"><code>/llm.txt</code> <span
+                        class="opacity-50">Discoverability</span></h2>
+                <p class="clamp-subtitle opacity-80 max-w-[80%] mx-auto mb-8">
+                    The Pitch doesn't just go to humans anymore. Every published project automatically exposes a
+                    standard,
+                    markdown-formatted \`llm.txt\` endpoint.
+                </p>
+                <div class="liquid-glass px-8 py-4 inline-block font-mono text-left text-white/70">
+                    # Startup: Kinesys<br />
+                    ## Verdict: Worth a Call<br />
+                    ## Risks: [ Market Saturation ]
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 9: Architecture -->
+        <div class="slide" data-bg="https://stream.mux.com/fHfa8VIbBdqZelLGg5thjsypZ101M01dbyIMLNDWQwlLA.m3u8">
+            <video autoplay loop muted playsinline class="bg-video"></video>
+            <div class="content-layer">
+                <header>
+                    <div class="flex items-center gap-2"><i data-lucide="code-xml" class="w-6 h-6 opacity-90"></i></div>
+                    <div class="header-text">Page 008</div>
+                </header>
+                <div class="flex flex-col justify-center flex-1">
+                    <h2 class="clamp-title-md mb-12">Monolithic Yet Magical</h2>
+
+                    <div class="grid grid-cols-4 gap-4">
+                        <div class="liquid-glass p-[6%] flex flex-col items-center text-center">
+                            <i data-lucide="server" class="w-8 h-8 mb-4"></i>
+                            <h4 class="font-bold mb-2">FastAPI Backend</h4>
+                            <p class="text-xs text-white/60">One server to rule them all. No separate frontend to
+                                deploy.</p>
+                        </div>
+                        <div class="liquid-glass p-[6%] flex flex-col items-center text-center">
+                            <i data-lucide="database" class="w-8 h-8 mb-4"></i>
+                            <h4 class="font-bold mb-2">PostgreSQL</h4>
+                            <p class="text-xs text-white/60">User auth, project structures, and raw deck HTML strings.
+                            </p>
+                        </div>
+                        <div class="liquid-glass p-[6%] flex flex-col items-center text-center text-[#D2FF55]">
+                            <i data-lucide="layout-template" class="w-8 h-8 mb-4"></i>
+                            <h4 class="font-bold mb-2">Jinja2 SSR</h4>
+                            <p class="text-xs opacity-80">Server-side rendering for investor summaries without API
+                                calls.</p>
+                        </div>
+                        <div class="liquid-glass p-[6%] flex flex-col items-center text-center text-purple-400">
+                            <i data-lucide="brain-circuit" class="w-8 h-8 mb-4"></i>
+                            <h4 class="font-bold mb-2">Agent Generation</h4>
+                            <p class="text-xs opacity-80">OpenAI structuring ideas and spitting out pure HTML files.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 10: Market -->
+        <div class="slide intro" data-bg="https://stream.mux.com/Kec29dVyJgiPdtWaQtPuEiiGHkJIYQAVUJcNiIHUYeo.m3u8">
+            <video autoplay loop muted playsinline class="bg-video"></video>
+            <div class="content-layer">
+                <header>
+                    <div class="flex items-center gap-2"><i data-lucide="code-xml" class="w-6 h-6 opacity-90"></i></div>
+                    <div class="header-text">Page 009</div>
+                </header>
+                <div class="flex flex-col justify-center flex-1">
+                    <h2 class="clamp-title-md mb-[5%]">Who is this for?</h2>
+
+                    <div class="flex gap-[5%]">
+                        <div class="basis-1/2">
+                            <h1
+                                class="text-[clamp(48px,6vw,120px)] font-bold text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-500 leading-none mb-4">
+                                10x</h1>
+                            <p class="clamp-subtitle opacity-90">High-Velocity Founders</p>
+                            <p class="clamp-body opacity-70 mt-4">The serial builders who test 5-10 ideas a year. They
+                                hate assembling
+                                PDFs but need to look credible to attract co-founders and early checks.</p>
+                        </div>
+
+                        <div class="basis-1/2 flex flex-col gap-4">
+                            <div class="liquid-glass p-6">
+                                <div class="text-sm opacity-50 mb-1">Pre-product Value</div>
+                                <div class="clamp-card-title">Exist before you build.</div>
+                            </div>
+                            <div class="liquid-glass p-6">
+                                <div class="text-sm opacity-50 mb-1">Inbound Engine</div>
+                                <div class="clamp-card-title">Enable AI/VC discovery natively.</div>
+                            </div>
+                            <div class="liquid-glass p-6 bg-white/5 border-white/20">
+                                <div class="text-sm opacity-50 mb-1">Business Model (Future)</div>
+                                <div class="clamp-card-title">$15/mo per active project. Custom domains.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 11: Scope -->
+        <div class="slide" data-bg="https://stream.mux.com/fHfa8VIbBdqZelLGg5thjsypZ101M01dbyIMLNDWQwlLA.m3u8">
+            <video autoplay loop muted playsinline class="bg-video"></video>
+            <div class="content-layer">
+                <header>
+                    <div class="flex items-center gap-2"><i data-lucide="code-xml" class="w-6 h-6 opacity-90"></i></div>
+                    <div class="header-text">Page 010</div>
+                </header>
+                <div class="flex h-full items-center justify-between w-full">
+                    <!-- MVP -->
+                    <div class="liquid-glass p-[4%] basis-[45%] h-[60vh] flex flex-col">
+                        <h3 class="clamp-card-title mb-6 border-b border-white/10 pb-4 text-[#D2FF55]">Hackathon Scope
+                            (MVP)</h3>
+                        <ul class="space-y-4 clamp-body font-medium flex-1">
+                            <li class="flex items-center gap-3"><i data-lucide="check" class="w-5 h-5 opacity-70"></i>
+                                Google Auth
+                                implementation</li>
+                            <li class="flex items-center gap-3"><i data-lucide="check" class="w-5 h-5 opacity-70"></i>
+                                Post-idea
+                                structuring via API</li>
+                            <li class="flex items-center gap-3"><i data-lucide="check" class="w-5 h-5 opacity-70"></i>
+                                Deck generation
+                                & iFrame display</li>
+                            <li class="flex items-center gap-3"><i data-lucide="check" class="w-5 h-5 opacity-70"></i>
+                                Jinja2
+                                auto-rendered summaries</li>
+                            <li class="flex items-center gap-3"><i data-lucide="check" class="w-5 h-5 opacity-70"></i>
+                                <code>/llm.txt</code> endpoint routing
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="text-white/30"><i data-lucide="arrow-right" class="w-12 h-12"></i></div>
+
+                    <!-- V2 -->
+                    <div class="liquid-glass p-[4%] basis-[45%] h-[60vh] flex flex-col opacity-70">
+                        <h3 class="clamp-card-title mb-6 border-b border-white/10 pb-4">Version 2 (Beyond)</h3>
+                        <ul class="space-y-4 clamp-body font-medium flex-1">
+                            <li class="flex items-center gap-3"><i data-lucide="rocket" class="w-5 h-5"></i> Wildcard
+                                custom domains
+                            </li>
+                            <li class="flex items-center gap-3"><i data-lucide="bot" class="w-5 h-5"></i> "Ask Investor"
+                                RAG
+                                simulation</li>
+                            <li class="flex items-center gap-3"><i data-lucide="file-down" class="w-5 h-5"></i> PDF deck
+                                exports</li>
+                            <li class="flex items-center gap-3"><i data-lucide="git-branch" class="w-5 h-5"></i> Version
+                                control on
+                                ideation</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 12: Outro -->
+        <div class="slide outro" data-bg="https://stream.mux.com/00qQnfNo7sSpn3pB1hYKkyeSDvxs01NxiQ3sr29uL3e028.m3u8">
+            <video autoplay loop muted playsinline class="bg-video"></video>
+            <div class="content-layer">
+                <header>
+                    <div class="flex items-center gap-2"><i data-lucide="code-xml" class="w-6 h-6 opacity-90"></i><span
+                            class="header-text font-bold">Traction</span></div>
+                    <div class="header-text">Join The Waitlist</div>
+                </header>
+                <div class="flex flex-col justify-center flex-1">
+                    <h2 class="clamp-title-md tracking-[-0.02em] leading-tight mb-[3%]">Get your startup online <br />
+                        <span class="text-white/50">before you write a line of code.</span>
+                    </h2>
+                    <p class="clamp-body opacity-90 max-w-[38%] mb-[4%]">
+                        Stop sending empty PDFs. Start sending fully-fledged, generative web identities that impress
+                        investors and
+                        index perfectly into AI agents.
+                    </p>
+                    <div class="flex flex-col gap-[1.5%]">
+                        <div class="flex items-center gap-4 clamp-body"><i data-lucide="github"
+                                class="w-6 h-6 opacity-70"></i>
+                            /rikhil-nell/traction</div>
+                        <div class="flex items-center gap-4 clamp-body"><i data-lucide="twitter"
+                                class="w-6 h-6 opacity-70"></i>
+                            @rikhil_nell</div>
+                        <div class="flex items-center gap-4 clamp-body"><i data-lucide="mail"
+                                class="w-6 h-6 opacity-70"></i>
+                            hello@traction.com</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- SCRIPTING -->
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        const slides = document.querySelectorAll('.slide');
+        const dotContainer = document.getElementById('dots-container');
+        const counter = document.getElementById('slide-counter');
+        const controls = document.getElementById('controls');
+        const kbHint = document.getElementById('kb-hint');
+        let current = 0;
+
+        // Auto-hide controls mechanism
+        let hideTimeout;
+        function resetHideTimeout() {
+            controls.classList.remove('hidden');
+            kbHint.classList.remove('hidden');
+            clearTimeout(hideTimeout);
+            hideTimeout = setTimeout(() => {
+                controls.classList.add('hidden');
+                kbHint.classList.add('hidden');
+            }, 3000);
+        }
+
+        document.addEventListener('mousemove', resetHideTimeout);
+        document.addEventListener('keydown', resetHideTimeout);
+        resetHideTimeout();
+
+        // Setup Dots
+        slides.forEach((_, i) => {
+            const dot = document.createElement('div');
+            dot.className = \`dot \${i === 0 ? 'active' : ''}\`;
+            dot.onclick = () => goToSlide(i);
+            dotContainer.appendChild(dot);
+        });
+        const dots = document.querySelectorAll('.dot');
+
+        function updateNav() {
+            counter.innerText = \`\${current + 1} / \${slides.length}\`;
+            dots.forEach((d, i) => {
+                if (i === current) {
+                    d.classList.add('active');
+                } else {
+                    d.classList.remove('active');
+                }
+            });
+        }
+
+        function goToSlide(n) {
+            if (n < 0 || n >= slides.length) return;
+
+            slides.forEach((slide, i) => {
+                slide.classList.remove('active', 'past', 'future');
+                if (i < n) slide.classList.add('past');
+                if (i > n) slide.classList.add('future');
+                if (i === n) slide.classList.add('active');
+            });
+
+            current = n;
+            updateNav();
+        }
+
+        // Keyboard handlers
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                e.preventDefault();
+                goToSlide(current + 1);
+            }
+            if (e.key === 'ArrowLeft') {
+                goToSlide(current - 1);
+            }
+            if (e.key.toLowerCase() === 'f') toggleFullscreen();
+        });
+
+        // Fullscreen handling
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    console.log(\`Error attempting to enable fullscreen: \${err.message}\`);
+                });
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        }
+
+        // HLS Video Initialization
+        slides.forEach(slide => {
+            const src = slide.getAttribute('data-bg');
+            const video = slide.querySelector('.bg-video');
+
+            if (src && video) {
+                if (Hls.isSupported()) {
+                    const hls = new Hls({ enableWorker: true });
+                    hls.loadSource(src);
+                    hls.attachMedia(video);
+                    hls.on(Hls.Events.MANIFEST_PARSED, function () {
+                        // attempt play, though browsers block autoplay often unless muted (which they are)
+                        video.play().catch(e => console.log(e));
+                    });
+                } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                    // Safari native support
+                    video.src = src;
+                    video.addEventListener('loadedmetadata', function () {
+                        video.play().catch(e => console.log(e));
+                    });
+                }
+            }
+        });
+
+        // Initialize first slide properly
+        goToSlide(0);
+    </script>
+</body>
+
+</html>`;
+
 // ---------------------------------------------------------------------------
 // Projects
 // ---------------------------------------------------------------------------
@@ -669,6 +1483,19 @@ export const projects: Project[] = [
     thumbnailUrl: null,
     createdAt: "2026-02-24T08:00:00Z",
     updatedAt: "2026-02-24T08:01:00Z",
+  },
+  {
+    id: "proj-5",
+    userId: "user-1",
+    name: "Traction Pitch Deck",
+    prompt:
+      "Create an immersive pitch deck for Traction, the AI-powered startup pitch platform. Showcase the problem with current pitch workflows, the code-driven generation approach, and the one-link publishing model.",
+    status: "shared",
+    slidesHtml: [],
+    fullHtml: tractionDemoHtml,
+    thumbnailUrl: null,
+    createdAt: "2026-02-20T10:00:00Z",
+    updatedAt: "2026-02-25T12:00:00Z",
   },
 ];
 
@@ -823,6 +1650,155 @@ The company is raising a $12M Series A to expand its engineering team, secure re
     createdAt: "2026-01-10T09:13:00Z",
     updatedAt: "2026-01-10T09:13:00Z",
   },
+  // ---- Traction Demo Documents (proj-5) — all ready ----
+  {
+    id: "doc-10",
+    projectId: "proj-5",
+    type: "product-description",
+    title: "Product Description",
+    content: `Traction is an AI-powered startup pitch platform that transforms raw ideas into fully-realized, investor-ready web presentations. Unlike template-based tools, Traction generates bespoke HTML/CSS pitch decks with unique layouts, animations, and typography for every project.
+
+The platform operates in three phases: Ideate, Generate, and Publish. During ideation, founders dump their raw concept into the Traction Agent, which structures the idea and runs it through a brutally honest readiness assessment. The AI doesn't sugarcoat — it flags weak go-to-market strategies, vanity metrics, and missing distribution plans.
+
+In the generation phase, the AI produces a self-contained, code-driven web presentation. Each deck is 100% unique — no two startups share the same visual identity. The generated HTML is rendered in sandboxed iFrames within the Traction platform, ensuring security while preserving creative freedom.
+
+Finally, publication creates a single shareable link that includes the immersive presentation, an honest investor summary, identified risks and strengths, and a deep-dive document database. Every published project also exposes a standard llm.txt endpoint, making the startup discoverable by AI agents and automated investment screening tools.`,
+    status: "ready",
+    createdAt: "2026-02-20T10:05:00Z",
+    updatedAt: "2026-02-25T12:00:00Z",
+  },
+  {
+    id: "doc-11",
+    projectId: "proj-5",
+    type: "timeline",
+    title: "Company Timeline",
+    content: `Traction was conceived in Q3 2025 when the founding team — serial builders who had collectively launched over 20 startups — realized they were spending more time assembling pitch materials than actually building products. The insight was clear: the pitch workflow itself was broken.
+
+In Q4 2025, the team built the first prototype: a chatbot interface that could take a raw startup idea and produce structured documentation. Early testing with 50 founders revealed that the ideation feedback loop was the most valued feature — founders wanted honesty, not flattery.
+
+By Q1 2026, the platform evolved to include AI-generated HTML pitch decks. The key breakthrough was moving away from templates entirely, instead having the AI generate unique code-driven presentations for each startup. This eliminated the "everyone looks the same" problem that plagued existing pitch tools.
+
+The hackathon MVP was completed in February 2026, featuring Google Auth, post-idea structuring via API, deck generation with iFrame display, Jinja2 server-side rendered summaries, and llm.txt endpoint routing. The team is now preparing for public launch and seed fundraising.`,
+    status: "ready",
+    createdAt: "2026-02-20T10:06:00Z",
+    updatedAt: "2026-02-25T12:00:00Z",
+  },
+  {
+    id: "doc-12",
+    projectId: "proj-5",
+    type: "swot-analysis",
+    title: "SWOT Analysis",
+    content: `Strengths: Traction's core differentiator is its code-driven generation approach. While competitors rely on templates, Traction produces unique HTML/CSS for every deck, making each presentation visually distinct. The brutal honesty of the readiness agent builds trust with sophisticated founders who value substance over polish. The one-link publishing model with integrated investor summaries and risk assessments creates a significantly better experience for both founders and investors.
+
+Weaknesses: The platform is currently in MVP stage with limited production hardening. The AI generation quality is dependent on model capabilities and can occasionally produce inconsistent visual results. The team is small, limiting the speed of feature development and go-to-market execution. The monolithic architecture, while sufficient for launch, may need refactoring to scale.
+
+Opportunities: The global startup ecosystem produces millions of pitch decks annually, yet no dominant AI-native platform exists. The rise of AI-powered investment screening creates demand for machine-readable startup profiles (llm.txt). There is also significant opportunity in the adjacent market of accelerator programs and startup competitions that need standardized pitch formats.
+
+Threats: Large incumbents like Canva, Beautiful.ai, and Gamma could add AI-powered pitch generation features. The rapid pace of AI model improvements means the quality advantage from code-driven generation could be replicated. VC market downturns could reduce demand for pitch tools overall.`,
+    status: "ready",
+    createdAt: "2026-02-20T10:07:00Z",
+    updatedAt: "2026-02-25T12:00:00Z",
+  },
+  {
+    id: "doc-13",
+    projectId: "proj-5",
+    type: "market-research",
+    title: "Market Research",
+    content: `The global presentation software market is valued at approximately $8 billion and growing at 12% CAGR, driven by remote work and the shift toward digital communication. Within this market, the startup pitch deck segment represents a $600M annual opportunity when accounting for design agency fees, template subscriptions, and founder time costs.
+
+Primary research across 300 founders revealed critical pain points: 78% spend more than 4 hours assembling pitch materials, 65% feel their decks look generic despite using premium tools, and 82% wish they received honest feedback before presenting to investors. Only 12% of founders currently use AI tools for pitch creation, indicating massive room for adoption.
+
+The competitive landscape includes template-based tools (Slidebean, Pitch), general presentation platforms (Canva, Beautiful.ai, Gamma), and design agencies. None offer the combination of AI ideation, code-driven unique generation, and integrated investor-facing publishing that Traction provides.
+
+Key market trends favor Traction's approach: the rise of AI-native workflows, increasing investor fatigue with templated decks, and the emergence of programmatic deal sourcing that values machine-readable startup data.`,
+    status: "ready",
+    createdAt: "2026-02-20T10:08:00Z",
+    updatedAt: "2026-02-25T12:00:00Z",
+  },
+  {
+    id: "doc-14",
+    projectId: "proj-5",
+    type: "financial-projections",
+    title: "Financial Projections",
+    content: `Traction's financial model projects revenue growing from $0 at launch to $2.4M ARR by end of 2027. The primary revenue model is a subscription tier at $15/month per active project, supplemented by premium features including custom domains, analytics dashboards, and priority generation.
+
+The freemium model allows founders to create one project for free, with paid plans unlocking unlimited projects, custom branding, and advanced AI features. Based on comparable SaaS freemium benchmarks, we project a 6% free-to-paid conversion rate, growing to 10% as the product matures.
+
+Cost structure is dominated by AI inference costs (estimated at 35% of revenue at scale), engineering salaries (30%), and infrastructure (15%). Gross margins are projected to reach 55% by 2027 as inference costs decline and per-user revenue increases through upsells.
+
+Key assumptions include: 50,000 free signups in Year 1 (achievable through Product Hunt, startup communities, and accelerator partnerships), 3,000 paying customers by end of Year 1, and average revenue per paying user of $180/year. The company expects to reach cash-flow breakeven in Q2 2028 with a total funding need of $3M.`,
+    status: "ready",
+    createdAt: "2026-02-20T10:09:00Z",
+    updatedAt: "2026-02-25T12:00:00Z",
+  },
+  {
+    id: "doc-15",
+    projectId: "proj-5",
+    type: "funding-requirements",
+    title: "Funding Requirements",
+    content: `Traction is raising a $1.5M pre-seed round to take the platform from hackathon MVP to public launch. The round is structured as a SAFE with a $8M post-money valuation cap.
+
+Allocation of funds: 45% ($675K) will go toward engineering, specifically hiring 3 additional engineers to build production infrastructure, improve AI generation quality, and develop the custom domains feature. 20% ($300K) covers AI inference costs for the first 18 months, including model fine-tuning experiments and GPU compute for deck generation.
+
+Another 20% ($300K) funds go-to-market efforts including Product Hunt launch campaigns, partnerships with 10 startup accelerators, content marketing targeted at founder communities, and a referral program. The remaining 15% ($225K) covers operations including legal, accounting, and cloud infrastructure.
+
+Post-raise, the company will have approximately 18 months of runway. Key milestones within this period include: public launch (Month 2), 10,000 registered users (Month 6), 1,000 paying customers (Month 12), and Series A readiness (Month 18) with demonstrated product-market fit metrics.`,
+    status: "ready",
+    createdAt: "2026-02-20T10:10:00Z",
+    updatedAt: "2026-02-25T12:00:00Z",
+  },
+  {
+    id: "doc-16",
+    projectId: "proj-5",
+    type: "product-forecast",
+    title: "Product Forecast",
+    content: `Traction's product roadmap for 2026-2027 is organized into three phases aligned with company growth milestones.
+
+Phase 1 — Launch (Q1-Q2 2026): Complete production hardening of the MVP. Key deliverables include robust error handling for AI generation failures, rate limiting, proper authentication with Google OAuth, responsive design for mobile viewing of shared decks, and basic analytics showing view counts and engagement metrics per shared link.
+
+Phase 2 — Growth (Q3-Q4 2026): Focus on features that drive retention and monetization. Wildcard custom domains allow startups to host their pitch at pitch.mystartup.com. An "Ask Investor" RAG simulation lets founders practice Q&A against an AI trained on common investor questions. PDF deck exports enable offline sharing. Version control on ideation preserves the evolution of a startup's narrative over time.
+
+Phase 3 — Platform (H1 2027): Transform Traction from a tool into a platform. Launch a startup directory where published projects are discoverable by investors. Build an API for accelerators to programmatically create and manage cohort pitch decks. Introduce collaborative editing so co-founders can work on pitches simultaneously. Add integration with fundraising CRMs like Affinity and 4Degrees.`,
+    status: "ready",
+    createdAt: "2026-02-20T10:11:00Z",
+    updatedAt: "2026-02-25T12:00:00Z",
+  },
+  {
+    id: "doc-17",
+    projectId: "proj-5",
+    type: "competitive-analysis",
+    title: "Competitive Analysis",
+    content: `The pitch deck creation market has several established players, but none take the fully AI-native, code-driven approach that Traction employs.
+
+Slidebean is the closest competitor in terms of focusing specifically on startup pitch decks. They offer AI-assisted content suggestions and professional templates. However, Slidebean's output is fundamentally template-based — every deck uses a pre-designed layout with variable content slots. Pricing starts at $199/year, positioning them in the premium segment. Traction differentiates through unique code-driven generation and the integrated investor summary.
+
+Beautiful.ai and Gamma offer AI-powered presentation creation for general use cases. Beautiful.ai uses smart templates that auto-adjust layouts, while Gamma generates presentations from prompts. Both produce visually appealing results but lack startup-specific features like readiness assessment, investor summaries, and llm.txt discoverability. Their broad market focus means they don't optimize for the founder-to-investor communication flow.
+
+Canva dominates the general design market and has added AI features, but pitch deck creation is a minor use case within their massive platform. The experience is generic — founders must manually build every aspect of their pitch. Pitch.com targets the startup market with collaborative features but relies on traditional slide editing without AI generation.
+
+Traction's defensible advantages include: the brutal honesty readiness agent (no competitor provides genuine critical feedback), code-driven unique visual generation (not templates), and the one-link publishing model with integrated investor intelligence. The llm.txt endpoint is a first-mover feature with no equivalent in the market.`,
+    status: "ready",
+    createdAt: "2026-02-20T10:12:00Z",
+    updatedAt: "2026-02-25T12:00:00Z",
+  },
+  {
+    id: "doc-18",
+    projectId: "proj-5",
+    type: "executive-summary",
+    title: "Executive Summary",
+    content: `Traction is building the definitive platform for startup pre-launch presence. The platform transforms raw startup ideas into polished, investor-ready web presentations through an AI-powered workflow that is honest, unique, and immediately publishable.
+
+The current pitch workflow is fundamentally broken. Founders spend hours assembling scattered PDFs, Google Docs, and slide decks that investors skim in seconds. Existing AI tools just put "icing on a bad cake" — they generate pretty templates but don't address the underlying quality of the pitch narrative or provide genuine critical feedback.
+
+Traction solves this with a three-phase approach: Ideate (AI-driven idea structuring with brutal readiness feedback), Generate (code-driven HTML presentations that are 100% unique — no templates), and Publish (one link containing the immersive deck, investor summary, risk analysis, and supporting documents).
+
+The platform also introduces llm.txt discoverability, making published startups findable by AI agents and automated investment screening tools — a capability no competitor offers.
+
+The team consists of serial builders who have collectively launched 20+ startups and experienced the pitch problem firsthand. The hackathon MVP demonstrates the complete flow from ideation to publication. Traction is raising $1.5M pre-seed to take the product to market, targeting 10,000 registered users and 1,000 paying customers within 12 months of launch.`,
+    status: "ready",
+    createdAt: "2026-02-20T10:13:00Z",
+    updatedAt: "2026-02-25T12:00:00Z",
+  },
 ];
 
 // ---------------------------------------------------------------------------
@@ -909,6 +1885,23 @@ export const chatMessages: ChatMessage[] = [
     content:
       "Added Priya Sharma to the team slide as Head of Compliance, highlighting her role as former compliance lead at TransferWise (Wise) and her licensing across 12 jurisdictions. This directly addresses the regulatory concern that many fintech investors have. The slide now shows three strong profiles covering product, engineering, and compliance — a well-rounded founding team.",
     createdAt: "2026-02-20T14:01:00Z",
+  },
+  // ---- Traction Demo Messages ----
+  {
+    id: "msg-11",
+    projectId: "proj-5",
+    role: "user",
+    content:
+      "Build an immersive pitch deck for Traction itself — our AI-powered startup pitch platform. Make it cinematic with video backgrounds and glassmorphism effects.",
+    createdAt: "2026-02-20T10:00:00Z",
+  },
+  {
+    id: "msg-12",
+    projectId: "proj-5",
+    role: "assistant",
+    content:
+      "I've generated a 12-slide immersive pitch deck for Traction with HLS video backgrounds, glassmorphism UI, and responsive typography. The deck covers: cover, problem (2 slides), solution, brutal ideation, code-driven generation, one-link pitch, llm.txt discoverability, architecture, market, scope, and outro. All 9 supporting documents have been created and are ready for review.",
+    createdAt: "2026-02-20T10:01:00Z",
   },
 ];
 
@@ -1029,6 +2022,15 @@ export const shareLinks: ShareLink[] = [
     expiresAt: "2026-04-01T00:00:00Z",
     viewCount: 47,
     createdAt: "2026-02-20T15:00:00Z",
+  },
+  {
+    id: "share-2",
+    projectId: "proj-5",
+    slug: "traction-pitch-2026",
+    isPasswordProtected: false,
+    expiresAt: null,
+    viewCount: 128,
+    createdAt: "2026-02-25T12:00:00Z",
   },
 ];
 

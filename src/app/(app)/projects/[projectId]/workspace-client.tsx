@@ -193,20 +193,23 @@ export function WorkspaceClient({
           <div className="flex-1 min-h-0">
             <DeckViewer
               slides={project.slidesHtml}
+              fullHtml={project.fullHtml}
               onSlideChange={handleSlideChange}
             />
           </div>
 
-          {/* Bottom hover zone — slide strip appears on hover */}
-          <div className="absolute bottom-0 left-0 right-0 z-10 group/bottom" style={{ height: "80px" }}>
-            <div className="absolute bottom-0 left-0 right-0 opacity-0 group-hover/bottom:opacity-100 transition-opacity duration-200">
-              <SlideStrip
-                slideCount={project.slidesHtml.length}
-                activeIndex={currentSlide}
-                onSelect={handleSlideChange}
-              />
+          {/* Bottom hover zone — slide strip appears on hover (only if no fullHtml) */}
+          {!project.fullHtml && (
+            <div className="absolute bottom-0 left-0 right-0 z-10 group/bottom" style={{ height: "80px" }}>
+              <div className="absolute bottom-0 left-0 right-0 opacity-0 group-hover/bottom:opacity-100 transition-opacity duration-200">
+                <SlideStrip
+                  slideCount={project.slidesHtml.length}
+                  activeIndex={currentSlide}
+                  onSelect={handleSlideChange}
+                />
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Top-left hover zone — back button appears on hover */}
           <div className="absolute top-0 left-0 z-10 group/back" style={{ width: "160px", height: "80px" }}>

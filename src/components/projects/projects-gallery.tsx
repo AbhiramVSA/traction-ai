@@ -91,8 +91,8 @@ export function ProjectsGallery({ projects }: ProjectsGalleryProps) {
                             key={f.value}
                             onClick={() => setFilter(f.value)}
                             className={`text-[12px] font-bold uppercase tracking-[0.08em] border transition-colors duration-200 ${filter === f.value
-                                    ? "bg-black text-white border-black"
-                                    : "bg-white text-gray-300 border-gray-100 hover:border-black hover:text-black"
+                                ? "bg-black text-white border-black"
+                                : "bg-white text-gray-300 border-gray-100 hover:border-black hover:text-black"
                                 }`}
                             style={{ padding: "10px 18px" }}
                         >
@@ -171,10 +171,10 @@ export function ProjectsGallery({ projects }: ProjectsGalleryProps) {
                             />
                             <div className="relative z-10 flex flex-col items-center">
                                 <span className="text-[32px] font-black text-gray-100 group-hover:text-black transition-colors duration-300 leading-none">
-                                    {project.slidesHtml.length}
+                                    {project.fullHtml ? "FULL" : project.slidesHtml.length}
                                 </span>
                                 <span className="text-[11px] font-mono text-gray-200 uppercase tracking-widest" style={{ marginTop: "6px" }}>
-                                    slides
+                                    {project.fullHtml ? "html" : "slides"}
                                 </span>
                             </div>
 
