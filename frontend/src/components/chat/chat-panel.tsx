@@ -73,9 +73,10 @@ export function ChatPanel({
         let errorContent = "Sorry, something went wrong. Please try again.";
         if (err instanceof ApiError && err.status === 422) {
           try {
-            const body = JSON.parse(JSON.parse(err.message).detail);
-            const count = body.incomplete_count ?? "some";
-            errorContent = `${body.message} (${count} remaining)`;
+            const body = JSON.parse(err.message);
+            const detail = body.detail;
+            const docs = detail?.incomplete_docs?.join(", ") || "";
+            errorContent = `${detail?.message || "Documents incomplete."} Incomplete: ${docs}`;
           } catch {
             errorContent = "All 9 documents must be complete before generating designs.";
           }
