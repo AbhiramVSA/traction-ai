@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { getPublicProject } from "@/lib/api";
+import { MarkdownRenderer } from "@/components/ui/markdown-renderer";
 import type { PublicProjectResponse, ProjectDocument } from "@/types";
 
 type Phase = "deck" | "documents" | "document";
@@ -180,13 +181,7 @@ export function PublicShareClient({ username, projectName }: { username: string;
         {/* Content */}
         <div className="max-w-[720px] mx-auto" style={{ padding: "clamp(32px, 4vw, 64px)" }}>
           <h1 className="text-[24px] font-bold">{selectedDoc.title}</h1>
-          <div className="prose" style={{ marginTop: "32px" }}>
-            {selectedDoc.content.split("\n\n").map((paragraph, i) => (
-              <p key={i} className="text-[15px] text-gray-400 leading-relaxed" style={{ marginBottom: "24px" }}>
-                {paragraph}
-              </p>
-            ))}
-          </div>
+          <MarkdownRenderer content={selectedDoc.content} style={{ marginTop: "32px" }} />
         </div>
 
         {/* Footer */}
