@@ -116,6 +116,28 @@ export function IdeationClient({ username, projectName }: IdeationClientProps) {
     return Object.values(extractionState).filter((v) => v.is_complete).length;
   }, [extractionState]);
 
+  // Poll for project status when background generation is running
+  useEffect(() => {
+    if (!project || project.status !== "generating") return;
+
+    const interval = setInterval(async () => {
+      try {
+        const updated = await getProjectByName(projectName.replace(/-/g, " "));
+        if (updated.status !== "generating") {
+          setProject(updated);
+          // Refresh documents since generation may have populated their content
+          getProjectDocuments(updated.id).then(setDocuments).catch(() => {});
+          // Refresh messages to pick up the completion/error message
+          getMessages(updated.id).then(setMessages).catch(() => {});
+        }
+      } catch {
+        // Ignore transient polling errors
+      }
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [project?.status, projectName]);
+
   // Escape key closes fullscreen
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
