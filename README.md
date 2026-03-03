@@ -1,78 +1,76 @@
 # Traction Frontend
-The Enterprise Interface for AI-Driven Revenue Operations
 
-Traction Frontend is a high-performance, TypeScript-based web application designed to orchestrate and visualize complex Agentic AI workflows. It serves as the command center for the Traction platform, enabling RevOps teams to manage autonomous lead discovery, intent analysis, and multi-channel GTM strategies.
+The enterprise interface for AI-driven revenue operations.
 
-# 🏗 Architecture & Tech Stack
-This repository is built for scale, type safety, and low latency in Generative AI environments.
+Traction Frontend is a TypeScript web application that orchestrates and visualizes agentic AI workflows. It serves as the command center for the Traction platform, enabling RevOps teams to manage autonomous lead discovery, intent analysis, and multi-channel GTM strategies.
 
-Framework: Next.js 14+ (App Router) for optimized React Server Components (RSC).
+## Architecture and Tech Stack
 
-Language: TypeScript with strict mode for E2E type safety.
+| Layer               | Technology                                                        |
+| ------------------- | ----------------------------------------------------------------- |
+| Framework           | Next.js 16 (App Router, React Server Components)                 |
+| Language            | TypeScript (strict mode)                                          |
+| UI                  | Tailwind CSS 4 with a custom enterprise design system             |
+| Presentation        | Reveal.js for slide rendering, PptxGenJS for PowerPoint export    |
+| Runtime             | React 19                                                          |
 
-State Orchestration: Advanced state management handling asynchronous Agentic Feedback Loops.
+## Key Engineering Implementations
 
-UI/UX: Tailwind CSS with a custom design system for enterprise-grade consistency.
+### Real-time Agentic Streams
 
-Data Fetching: TanStack Query for robust caching and synchronization with the FastAPI backend.
+The frontend implements specialized handlers for Server-Sent Events (SSE) and streaming LLM responses. Partial JSON parsing updates the UI incrementally as agents complete sub-tasks (e.g., Lead Enrichment, Personality Analysis).
 
-# 🚀 Key Engineering Implementations
-1. Real-time Agentic Streams
-The frontend implements specialized handlers for Server-Sent Events (SSE) and streaming LLM responses. It manages partial JSON parsing to update the UI incrementally as agents complete sub-tasks (e.g., Lead Enrichment → Personality Analysis).
+### High-Concurrency Data Handling
 
-2. High-Concurrency Data Handling
-To support environments with 10k+ concurrent entities, the dashboard utilizes:
+Designed for environments with 10k+ concurrent entities:
 
-Windowing/Virtualization: For rendering massive lead lists without DOM bloat.
+- **Windowing/Virtualization** -- Renders massive lead lists without DOM bloat.
+- **Optimistic Updates** -- Immediate UI feedback for agent triggers while maintaining backend consistency.
+- **Race Condition Mitigation** -- `AbortController`-based cancellation of stale API requests during rapid navigation or agent state changes.
 
-Optimistic Updates: Immediate UI feedback for agent triggers while maintaining backend consistency.
+### Production Resilience
 
-Race Condition Mitigation: Using AbortControllers to cancel stale API requests during rapid navigation or agent state changes.
+- **Dependency Injection** -- Modular service layers decoupling UI components from API logic.
+- **Schema Synchronization** -- Direct integration with Pydantic-AI backend schemas to prevent breakage from upstream data changes.
+- **Error Boundaries** -- Granular isolation of AI service failures without crashing the workspace.
 
-3. Production-Level Resilience
-Dependency Injection: Modular service layers to decouple UI components from API logic.
+## Getting Started
 
-Schema Synchronization: Direct integration with Pydantic-AI backend schemas to ensure frontend components never break due to upstream data changes.
+### Prerequisites
 
-Error Boundaries: Granular error handling to isolate AI service failures without crashing the entire workspace.
+- Node.js v20.x or higher
+- npm (ships with Node.js)
 
-# 🛠 Getting Started
-Prerequisites
-Node.js: v20.x or higher
+### Installation
 
-Package Manager: pnpm (recommended) or npm
-
-Installation
-Clone the Repository:
-
-Bash
+```bash
 git clone https://github.com/traction-ai/traction-frontend.git
-cd traction-frontend
-Install Dependencies:
+cd traction-frontend/frontend
+```
 
-Bash
-pnpm install
-Environment Setup:
+```bash
+npm install
+```
 
-Bash
+```bash
 cp .env.example .env.local
-# Define your NEXT_PUBLIC_API_URL and Auth providers
-Launch Development Server:
+# Set NEXT_PUBLIC_API_URL and auth provider config
+```
 
-Bash
-pnpm dev
-# 🧪 Testing & Quality Assurance
-Every pull request is subjected to a rigorous CI/CD pipeline:
+```bash
+npm run dev
+```
 
-Static Analysis: eslint and prettier for code consistency.
+## Testing and Quality Assurance
 
-Unit Testing: Vitest for business logic and utility functions.
+Every pull request goes through a CI/CD pipeline:
 
-Integration Testing: Cypress or Playwright to verify critical user paths (e.g., Agent Deployment, Lead Export).
+- **Static Analysis** -- ESLint and Prettier for code consistency.
+- **Unit Testing** -- Vitest for business logic and utility functions.
+- **Integration Testing** -- Playwright for critical user paths (agent deployment, lead export).
 
-🗺 Roadmap
-[ ] Advanced Visualization: Integrated Graph Neural Network (GNN) visualization for lead-to-account mapping.
+## Roadmap
 
-[ ] Local LLM Integration: WebGPU-based processing for client-side data filtering.
-
-[ ] Multi-Agent Canvas: A drag-and-drop interface for building custom agentic workflows.
+- [ ] Advanced Visualization -- Graph Neural Network (GNN) visualization for lead-to-account mapping.
+- [ ] Local LLM Integration -- WebGPU-based processing for client-side data filtering.
+- [ ] Multi-Agent Canvas -- Drag-and-drop interface for building custom agentic workflows.
