@@ -1,8 +1,8 @@
 # Traction Frontend
 
-The enterprise interface for AI-driven revenue operations.
+This repository contains the Traction web client in [`frontend/`](frontend/). It uses the Traction API for project, document, chat, and public-share workflows.
 
-Traction Frontend is a TypeScript web application that orchestrates and visualizes agentic AI workflows. It serves as the command center for the Traction platform, enabling RevOps teams to manage autonomous lead discovery, intent analysis, and multi-channel GTM strategies.
+The client includes dashboard and ideation routes, document views, chat, and public project pages. The API is maintained separately in [traction-ai-backend](https://github.com/AbhiramVSA/traction-ai-backend).
 
 ## Architecture and Tech Stack
 
@@ -14,26 +14,6 @@ Traction Frontend is a TypeScript web application that orchestrates and visualiz
 | Presentation        | Reveal.js for slide rendering, PptxGenJS for PowerPoint export    |
 | Runtime             | React 19                                                          |
 
-## Key Engineering Implementations
-
-### Real-time Agentic Streams
-
-The frontend implements specialized handlers for Server-Sent Events (SSE) and streaming LLM responses. Partial JSON parsing updates the UI incrementally as agents complete sub-tasks (e.g., Lead Enrichment, Personality Analysis).
-
-### High-Concurrency Data Handling
-
-Designed for environments with 10k+ concurrent entities:
-
-- **Windowing/Virtualization** -- Renders massive lead lists without DOM bloat.
-- **Optimistic Updates** -- Immediate UI feedback for agent triggers while maintaining backend consistency.
-- **Race Condition Mitigation** -- `AbortController`-based cancellation of stale API requests during rapid navigation or agent state changes.
-
-### Production Resilience
-
-- **Dependency Injection** -- Modular service layers decoupling UI components from API logic.
-- **Schema Synchronization** -- Direct integration with Pydantic-AI backend schemas to prevent breakage from upstream data changes.
-- **Error Boundaries** -- Granular isolation of AI service failures without crashing the workspace.
-
 ## Getting Started
 
 ### Prerequisites
@@ -44,30 +24,32 @@ Designed for environments with 10k+ concurrent entities:
 ### Installation
 
 ```bash
-git clone https://github.com/traction-ai/traction-frontend.git
-cd traction-frontend/frontend
+git clone https://github.com/AbhiramVSA/traction-ai.git
+cd traction-ai/frontend
 ```
 
 ```bash
-npm install
+npm ci
 ```
 
-```bash
-cp .env.example .env.local
-# Set NEXT_PUBLIC_API_URL and auth provider config
-```
+The client uses `https://api.traction-ai.me` by default. Set `NEXT_PUBLIC_API_URL` to use another API base URL.
 
 ```bash
 npm run dev
 ```
 
-## Testing and Quality Assurance
+## Scripts
 
-Every pull request goes through a CI/CD pipeline:
+Run these commands from `frontend/`:
 
-- **Static Analysis** -- ESLint and Prettier for code consistency.
-- **Unit Testing** -- Vitest for business logic and utility functions.
-- **Integration Testing** -- Playwright for critical user paths (agent deployment, lead export).
+| Command | Purpose |
+| --- | --- |
+| `npm run dev` | Start the Next.js development server. |
+| `npm run build` | Build the production app. |
+| `npm run start` | Serve the production build. |
+| `npm run lint` | Run ESLint. |
+
+The package manifest does not define a test command.
 
 ## Roadmap
 
