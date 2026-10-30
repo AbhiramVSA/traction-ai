@@ -1,6 +1,10 @@
-# Traction Frontend
+<p align="center">
+  <img src="assets/traction-mark.png" alt="Traction project, document, and chat workspace mark" width="200" />
+</p>
 
-This repository contains the Traction web client in [`frontend/`](frontend/). It uses the Traction API for project, document, chat, and public-share workflows.
+<h1 align="center">Traction Frontend</h1>
+
+<p align="center">This repository contains the Traction web client in <a href="frontend/"><code class="notranslate">frontend/</code></a>. It uses the Traction API for project, document, chat, and public-share workflows.</p>
 
 The client includes dashboard and ideation routes, document views, chat, and public project pages. The API is maintained separately in [traction-ai-backend](https://github.com/AbhiramVSA/traction-ai-backend).
 
